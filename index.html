@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Kandang - Elba & KUB Janaka</title>
+    <title>Smart Kandang & Sholat - Elba & KUB Janaka</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1e293b">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -13,8 +13,15 @@
         .container { background: #1e293b; border-radius: 20px; padding: 24px; width: 100%; max-width: 450px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3); border: 1px solid #334155; }
         
         h2 { text-align: center; color: #f8fafc; font-size: 1.35rem; font-weight: 700; margin-bottom: 4px; }
-        .subtitle { text-align: center; font-size: 0.82rem; color: #94a3b8; margin-bottom: 15px; background: #334155; padding: 4px 10px; border-radius: 20px; display: inline-block; width: 100%; }
+        .subtitle { text-align: center; font-size: 0.82rem; color: #94a3b8; margin-bottom: 12px; background: #334155; padding: 4px 10px; border-radius: 20px; display: inline-block; width: 100%; }
         
+        /* Widget Sholat */
+        .sholat-box { background: #065f46; border: 1px solid #059669; border-radius: 12px; padding: 12px; margin-bottom: 15px; text-align: center; color: #ecfdf5; }
+        .sholat-title { font-size: 0.85rem; font-weight: 700; margin-bottom: 6px; color: #6ee7b7; text-transform: uppercase; letter-spacing: 0.5px; }
+        .sholat-times { display: flex; justify-content: space-around; font-size: 0.75rem; gap: 4px; }
+        .sholat-item { background: rgba(0,0,0,0.2); padding: 5px 6px; border-radius: 6px; flex: 1; }
+        .sholat-time { font-weight: 700; color: #ffffff; margin-top: 2px; }
+
         .section-title { font-size: 0.88rem; color: #38bdf8; font-weight: 600; margin: 14px 0 6px 0; border-left: 3px solid #38bdf8; padding-left: 8px; }
         
         .input-group { margin-bottom: 10px; }
@@ -61,6 +68,18 @@
         <h2>Smart Kandang</h2>
         <div class="subtitle">Elba & KUB Janaka (Target 1 Kg)</div>
         
+        <div class="sholat-box">
+            <div class="sholat-title">🕌 Pengingat Waktu Sholat Hari Ini</div>
+            <div class="sholat-times">
+                <div class="sholat-item">Subuh<div class="sholat-time">04:46</div></div>
+                <div class="sholat-item">Dzuhur<div class="sholat-time">12:03</div></div>
+                <div class="sholat-item">Ashar<div class="sholat-time">15:24</div></div>
+                <div class="sholat-item">Maghrib<div class="sholat-time">17:59</div></div>
+                <div class="sholat-item">Isya<div class="sholat-time">19:10</div></div>
+            </div>
+            <div style="font-size: 0.72rem; margin-top: 6px; color: #a7f3d0; font-style: italic;">*Utamakan sholat tepat waktu di sela aktivitas kandang.</div>
+        </div>
+
         <div class="section-title">🐔 Data Asas & Populasi</div>
         <div class="row">
             <div class="input-group col">
@@ -118,7 +137,7 @@
             <p id="resRingkasan" style="font-size: 0.82rem; font-weight: 600; color: #f8fafc; margin-bottom: 3px;"></p>
             <div class="advice" id="adviceText">--</div>
             <div class="reminder-box" id="reminderBox">
-                <div class="reminder-title">🔔 Pengingat Pemeliharaan:</div>
+                <div class="reminder-title">🔔 Pengingat Pemeliharaan & Sholat:</div>
                 <div id="reminderText">-</div>
             </div>
         </div>
@@ -207,7 +226,8 @@
                 adviceStr = 'Parameter sedikit bergeser dari tahap nyaman. Silakan pantau sirkulasi udara.';
             }
 
-            let reminderStr = '• Pastikan penggiliran baki maggot di bawah kandang terkawal.<br>';
+            let reminderStr = '• Jangan lupa tunaikan Sholat 5 Waktu tepat pada waktunya.<br>';
+            reminderStr += '• Pastikan penggiliran baki maggot di bawah kandang terkawal.<br>';
             if (sekam === 'Basah / Menggumpal' || kelembapan > 75) {
                 reminderStr += '👉 <strong>SEGERA GANTI LITTER / TAMBAH SEKAM BAKAR!</strong> Alas kandang terlalu lembap.<br>';
             }
@@ -233,11 +253,11 @@
 
             const dataBaru = { waktuCatat, umur, populasi, pakan, suhu, kelembapan, hujan, sekam, status };
 
-            let riwayat = JSON.parse(localStorage.getItem('riwayatSmartKandangFinalV4')) || [];
+            let riwayat = JSON.parse(localStorage.getItem('riwayatSmartKandangFinalV5')) || [];
             riwayat.unshift(dataBaru);
             if (riwayat.length > 100) riwayat.pop();
 
-            localStorage.setItem('riwayatSmartKandangFinalV4', JSON.stringify(riwayat));
+            localStorage.setItem('riwayatSmartKandangFinalV5', JSON.stringify(riwayat));
             tampilkanRiwayat();
         }
 
@@ -245,7 +265,7 @@
             const historyList = document.getElementById('historyList');
             const btnClear = document.getElementById('btnClear');
             const btnExcel = document.getElementById('btnExcel');
-            let riwayat = JSON.parse(localStorage.getItem('riwayatSmartKandangFinalV4')) || [];
+            let riwayat = JSON.parse(localStorage.getItem('riwayatSmartKandangFinalV5')) || [];
 
             if (riwayat.length === 0) {
                 historyList.innerHTML = '<p style="color: #64748b; font-style: italic;">Belum ada catatan tersimpan.</p>';
@@ -272,13 +292,12 @@
         }
 
         function downloadExcel() {
-            let riwayat = JSON.parse(localStorage.getItem('riwayatSmartKandangFinalV4')) || [];
+            let riwayat = JSON.parse(localStorage.getItem('riwayatSmartKandangFinalV5')) || [];
             if (riwayat.length === 0) {
                 alert('Belum ada data untuk diunduh.');
                 return;
             }
 
-            // Format CSV yang bisa dibuka langsung di Microsoft Excel
             let csvContent = "Waktu Catat;Umur (Hari);Populasi (Ekor);Pakan Habis;Suhu (C);Kelembapan (%);Kondisi Hujan;Kondisi Sekam;Status Kandang\n";
             
             riwayat.forEach(item => {
@@ -297,7 +316,7 @@
 
         function hapusRiwayat() {
             if (confirm('Yakin ingin menghapus seluruh riwayat catatan kandang?')) {
-                localStorage.removeItem('riwayatSmartKandangFinalV4');
+                localStorage.removeItem('riwayatSmartKandangFinalV5');
                 tampilkanRiwayat();
             }
         }
