@@ -1,5 +1,5 @@
 // Ganti 'MASUKKAN_API_KEY_ANDA_DISINI' dengan API Key dari openweathermap.org
-const API_KEY = 'MASUKKAN_API_KEY_ANDA_DISINI';
+const API_KEY = '4215d2984044ed793009bb2c32ffb69a';
 
 async function getWeatherData() {
     const city = document.getElementById('cityInput').value;
