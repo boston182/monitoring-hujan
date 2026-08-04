@@ -60,7 +60,7 @@
         <div class="section-title">🐔 Data Asas & Populasi</div>
         <div class="row">
             <div class="input-group col">
-                <label>Tarikh Check-in DOC:</label>
+                <label>Tanggal Check-in DOC:</label>
                 <input type="date" id="inputCheckIn">
             </div>
             <div class="input-group col">
@@ -72,18 +72,18 @@
         <div class="section-title">📊 1. Data Pakan Harian</div>
         <div class="input-group">
             <label>Pakan Habis Hari Ini (Kg/Gram):</label>
-            <input type="text" id="inputPakan" placeholder="Mis: 1.5 Kg">
+            <input type="text" id="inputPakan" placeholder="Mis: 350 gram">
         </div>
 
         <div class="section-title">🌡️ 2. Monitoring Cuaca & Kandang</div>
         <div class="row">
             <div class="input-group col">
                 <label>Suhu Kandang (°C):</label>
-                <input type="number" id="inputSuhu" placeholder="Mis: 26" step="0.1">
+                <input type="number" id="inputSuhu" placeholder="Mis: 28" step="0.1">
             </div>
             <div class="input-group col">
                 <label>Kelembapan (%):</label>
-                <input type="number" id="inputKelembapan" placeholder="Mis: 65">
+                <input type="number" id="inputKelembapan" placeholder="Mis: 60">
             </div>
         </div>
 
@@ -111,4 +111,166 @@
 
         <div class="result-card" id="resultCard" style="display: none;">
             <div class="status-title" id="statusTitle">--</div>
-            <p id="resRingkasan" style="font-size: 0.82rem; font-weight
+            <p id="resRingkasan" style="font-size: 0.82rem; font-weight: 600; color: #f8fafc; margin-bottom: 3px;"></p>
+            <div class="advice" id="adviceText">--</div>
+            <div class="reminder-box" id="reminderBox">
+                <div class="reminder-title">🔔 Pengingat Pemeliharaan:</div>
+                <div id="reminderText">-</div>
+            </div>
+        </div>
+
+        <div class="history-section">
+            <div class="history-title">📜 Riwayat Catatan Harian</div>
+            <div class="history-list" id="historyList">
+                <p style="color: #64748b; font-style: italic;">Belum ada catatan tersimpan.</p>
+            </div>
+            <button class="btn-danger" onclick="hapusRiwayat()" id="btnClear" style="display: none;">Hapus Riwayat</button>
+        </div>
+    </div>
+
+    <script>
+        window.onload = function() {
+            tampilkanRiwayat();
+            // Otomatis set tanggal check-in default hari ini jika belum ada
+            if(!localStorage.getItem('savedCheckIn')) {
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('inputCheckIn').value = today;
+                localStorage.setItem('savedCheckIn', today);
+            } else {
+                document.getElementById('inputCheckIn').value = localStorage.getItem('savedCheckIn');
+            }
+            if(localStorage.getItem('savedPopulasi')) {
+                document.getElementById('inputPopulasi').value = localStorage.getItem('savedPopulasi');
+            }
+        };
+
+        function hitungUmurAyam(checkInDate) {
+            const tglCheckIn = new Date(checkInDate);
+            const tglHariIni = new Date();
+            const selisihWaktu = tglHariIni - tglCheckIn;
+            const selisihHari = Math.floor(selisihWaktu / (1000 * 60 * 60 * 24)) + 1;
+            return selisihHari > 0 ? selisihHari : 1;
+        }
+
+        function analisisDanSimpan() {
+            const checkIn = document.getElementById('inputCheckIn').value;
+            const populasi = document.getElementById('inputPopulasi').value;
+            const pakan = document.getElementById('inputPakan').value || '-';
+            const suhu = parseFloat(document.getElementById('inputSuhu').value);
+            const kelembapan = parseFloat(document.getElementById('inputKelembapan').value);
+            const hujan = document.getElementById('inputHujan').value;
+            const sekam = document.getElementById('inputSekam').value;
+
+            if(!checkIn) {
+                alert('Silakan masukkan tanggal check-in DOC!');
+                return;
+            }
+
+            // Simpan data asas
+            localStorage.setItem('savedCheckIn', checkIn);
+            localStorage.setItem('savedPopulasi', populasi);
+
+            const umur = hitungUmurAyam(checkIn);
+
+            const card = document.getElementById('resultCard');
+            const statusTitle = document.getElementById('statusTitle');
+            const resRingkasan = document.getElementById('resRingkasan');
+            const adviceText = document.getElementById('adviceText');
+            const reminderText = document.getElementById('reminderText');
+
+            if (isNaN(suhu) || isNaN(kelembapan)) {
+                alert('Mohon isi Suhu dan Kelembapan dengan benar!');
+                return;
+            }
+
+            card.style.display = 'block';
+            resRingkasan.innerText = `Umur: Hari ke-${umur} | Populasi: ${populasi} Ekor | Pakan: ${pakan}`;
+
+            let statusStr = '';
+            let adviceStr = '';
+            let statusClass = '';
+
+            if (suhu >= 22 && suhu <= 26 && kelembapan >= 55 && kelembapan <= 70 && sekam === 'Kering & Gembur') {
+                statusClass = 'status-aman';
+                statusStr = '✅ KONDISI KANDANG IDEAL';
+                adviceStr = 'Pertumbuhan menuju bobot 1 kg berjalan optimal dengan dukungan pakan & maggot.';
+            } else if (suhu > 30 || kelembapan > 80 || sekam === 'Basah / Menggumpal') {
+                statusClass = 'status-bahaya';
+                statusStr = '🚨 PERINGATAN RISIKO LINGKUNGAN';
+                adviceStr = 'Kelembapan/suhu tinggi. Waspada peningkatan gas amonia dari sisa kandang & baki maggot.';
+            } else {
+                statusClass = 'status-waspada';
+                statusStr = '⚠️ PERHATIAN KONDISI KANDANG';
+                adviceStr = 'Parameter sedikit bergeser dari tahap nyaman. Silakan pantau sirkulasi udara.';
+            }
+
+            let reminderStr = '• Pastikan penggiliran baki maggot di bawah kandang terkawal.<br>';
+            if (sekam === 'Basah / Menggumpal' || kelembapan > 75) {
+                reminderStr += '👉 <strong>SEGERA GANTI LITTER / TAMBAH SEKAM BAKAR!</strong> Alas kandang terlalu lembap.<br>';
+            }
+            if (umur <= 14) {
+                reminderStr += '👉 Fase Starter: Pastikan pemanas stabil dan air minum cukup untuk 79 ekor anak ayam.';
+            } else if (umur > 14 && umur <= 35) {
+                reminderStr += '👉 Fase Grower: Optimalkan pemberian pakan & maggot untuk mengejar target bobot 1 kg.';
+            } else {
+                reminderStr += '👉 Fase Pembesaran Akhir: Periksa keseragaman ukuran dan kualitas baki maggot.';
+            }
+
+            card.className = 'result-card ' + statusClass;
+            statusTitle.innerText = statusStr;
+            adviceText.innerText = adviceStr;
+            reminderText.innerHTML = reminderStr;
+
+            simpanKeRiwayat(umur, populasi, pakan, suhu, kelembapan, hujan, sekam, statusStr);
+        }
+
+        function simpanKeRiwayat(umur, populasi, pakan, suhu, kelembapan, hujan, sekam, status) {
+            const sekarang = new Date();
+            const waktuCatat = sekarang.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) + ' ' + sekarang.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+
+            const dataBaru = { waktuCatat, umur, populasi, pakan, suhu, kelembapan, hujan, sekam, status };
+
+            let riwayat = JSON.parse(localStorage.getItem('riwayatSmartKandangFinalV3')) || [];
+            riwayat.unshift(dataBaru);
+            if (riwayat.length > 50) riwayat.pop();
+
+            localStorage.setItem('riwayatSmartKandangFinalV3', JSON.stringify(riwayat));
+            tampilkanRiwayat();
+        }
+
+        function tampilkanRiwayat() {
+            const historyList = document.getElementById('historyList');
+            const btnClear = document.getElementById('btnClear');
+            let riwayat = JSON.parse(localStorage.getItem('riwayatSmartKandangFinalV3')) || [];
+
+            if (riwayat.length === 0) {
+                historyList.innerHTML = '<p style="color: #64748b; font-style: italic;">Belum ada catatan tersimpan.</p>';
+                btnClear.style.display = 'none';
+                return;
+            }
+
+            btnClear.style.display = 'block';
+            let html = '';
+            riwayat.forEach(item => {
+                html += `
+                    <div class="history-item">
+                        <div class="history-time">📅 ${item.waktuCatat} (Hari ke-${item.umur} | ${item.populasi} Ekor)</div>
+                        <strong>Pakan: ${item.pakan} | Suhu: ${item.suhu}°C | Lembap: ${item.kelembapan}%</strong>
+                        <div style="color: #94a3b8; margin-top: 2px;">
+                            🌧️ ${item.hujan} | 🪵 Sekam: ${item.sekam}
+                        </div>
+                    </div>
+                `;
+            });
+            historyList.innerHTML = html;
+        }
+
+        function hapusRiwayat() {
+            if (confirm('Yakin ingin menghapus seluruh riwayat catatan kandang?')) {
+                localStorage.removeItem('riwayatSmartKandangFinalV3');
+                tampilkanRiwayat();
+            }
+        }
+    </script>
+</body>
+</html>
