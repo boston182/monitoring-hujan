@@ -27,7 +27,11 @@
         
         button { width: 100%; padding: 12px; border-radius: 10px; border: none; background: #10b981; color: white; font-weight: 600; font-size: 0.95rem; cursor: pointer; margin-top: 14px; transition: background 0.2s; }
         button:hover { background: #059669; }
-        .btn-danger { background: #ef4444; margin-top: 8px; font-size: 0.82rem; padding: 7px; }
+        
+        .btn-excel { background: #2563eb; margin-top: 8px; font-size: 0.85rem; padding: 9px; }
+        .btn-excel:hover { background: #1d4ed8; }
+        
+        .btn-danger { background: #ef4444; margin-top: 6px; font-size: 0.8rem; padding: 7px; }
         .btn-danger:hover { background: #dc2626; }
         
         .result-card { margin-top: 15px; padding: 14px; border-radius: 12px; background: #0f172a; border-left: 5px solid #ccc; }
@@ -124,6 +128,7 @@
             <div class="history-list" id="historyList">
                 <p style="color: #64748b; font-style: italic;">Belum ada catatan tersimpan.</p>
             </div>
+            <button class="btn-excel" onclick="downloadExcel()" id="btnExcel" style="display: none;">📥 Unduh Laporan (Excel / CSV)</button>
             <button class="btn-danger" onclick="hapusRiwayat()" id="btnClear" style="display: none;">Hapus Riwayat</button>
         </div>
     </div>
@@ -131,7 +136,6 @@
     <script>
         window.onload = function() {
             tampilkanRiwayat();
-            // Otomatis set tanggal check-in default hari ini jika belum ada
             if(!localStorage.getItem('savedCheckIn')) {
                 const today = new Date().toISOString().split('T')[0];
                 document.getElementById('inputCheckIn').value = today;
@@ -166,7 +170,6 @@
                 return;
             }
 
-            // Simpan data asas
             localStorage.setItem('savedCheckIn', checkIn);
             localStorage.setItem('savedPopulasi', populasi);
 
@@ -226,30 +229,33 @@
 
         function simpanKeRiwayat(umur, populasi, pakan, suhu, kelembapan, hujan, sekam, status) {
             const sekarang = new Date();
-            const waktuCatat = sekarang.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) + ' ' + sekarang.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            const waktuCatat = sekarang.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) + ' ' + sekarang.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
 
             const dataBaru = { waktuCatat, umur, populasi, pakan, suhu, kelembapan, hujan, sekam, status };
 
-            let riwayat = JSON.parse(localStorage.getItem('riwayatSmartKandangFinalV3')) || [];
+            let riwayat = JSON.parse(localStorage.getItem('riwayatSmartKandangFinalV4')) || [];
             riwayat.unshift(dataBaru);
-            if (riwayat.length > 50) riwayat.pop();
+            if (riwayat.length > 100) riwayat.pop();
 
-            localStorage.setItem('riwayatSmartKandangFinalV3', JSON.stringify(riwayat));
+            localStorage.setItem('riwayatSmartKandangFinalV4', JSON.stringify(riwayat));
             tampilkanRiwayat();
         }
 
         function tampilkanRiwayat() {
             const historyList = document.getElementById('historyList');
             const btnClear = document.getElementById('btnClear');
-            let riwayat = JSON.parse(localStorage.getItem('riwayatSmartKandangFinalV3')) || [];
+            const btnExcel = document.getElementById('btnExcel');
+            let riwayat = JSON.parse(localStorage.getItem('riwayatSmartKandangFinalV4')) || [];
 
             if (riwayat.length === 0) {
                 historyList.innerHTML = '<p style="color: #64748b; font-style: italic;">Belum ada catatan tersimpan.</p>';
                 btnClear.style.display = 'none';
+                btnExcel.style.display = 'none';
                 return;
             }
 
             btnClear.style.display = 'block';
+            btnExcel.style.display = 'block';
             let html = '';
             riwayat.forEach(item => {
                 html += `
@@ -265,9 +271,33 @@
             historyList.innerHTML = html;
         }
 
+        function downloadExcel() {
+            let riwayat = JSON.parse(localStorage.getItem('riwayatSmartKandangFinalV4')) || [];
+            if (riwayat.length === 0) {
+                alert('Belum ada data untuk diunduh.');
+                return;
+            }
+
+            // Format CSV yang bisa dibuka langsung di Microsoft Excel
+            let csvContent = "Waktu Catat;Umur (Hari);Populasi (Ekor);Pakan Habis;Suhu (C);Kelembapan (%);Kondisi Hujan;Kondisi Sekam;Status Kandang\n";
+            
+            riwayat.forEach(item => {
+                csvContent += `"${item.waktuCatat}";"${item.umur}";"${item.populasi}";"${item.pakan}";"${item.suhu}";"${item.kelembapan}";"${item.hujan}";"${item.sekam}";"${item.status}"\n`;
+            });
+
+            const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'Laporan_Smart_Kandang_Elba_KUB.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
         function hapusRiwayat() {
             if (confirm('Yakin ingin menghapus seluruh riwayat catatan kandang?')) {
-                localStorage.removeItem('riwayatSmartKandangFinalV3');
+                localStorage.removeItem('riwayatSmartKandangFinalV4');
                 tampilkanRiwayat();
             }
         }
