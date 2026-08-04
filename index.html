@@ -15,7 +15,7 @@
         h2 { text-align: center; color: #f8fafc; font-size: 1.35rem; font-weight: 700; margin-bottom: 4px; }
         .subtitle { text-align: center; font-size: 0.82rem; color: #94a3b8; margin-bottom: 12px; background: #334155; padding: 4px 10px; border-radius: 20px; display: inline-block; width: 100%; }
         
-        /* Widget Sholat GPS Otomatis */
+        /* Widget Sholat GPS Otomatis & Alarm */
         .sholat-box { background: #065f46; border: 1px solid #059669; border-radius: 12px; padding: 12px; margin-bottom: 15px; text-align: center; color: #ecfdf5; }
         .sholat-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
         .sholat-title { font-size: 0.8rem; font-weight: 700; color: #6ee7b7; text-transform: uppercase; }
@@ -25,6 +25,7 @@
         .sholat-times { display: flex; justify-content: space-around; font-size: 0.75rem; gap: 4px; }
         .sholat-item { background: rgba(0,0,0,0.2); padding: 5px 4px; border-radius: 6px; flex: 1; }
         .sholat-time { font-weight: 700; color: #ffffff; margin-top: 2px; }
+        .alarm-status { font-size: 0.7rem; margin-top: 8px; color: #fde047; font-style: italic; }
 
         .section-title { font-size: 0.88rem; color: #38bdf8; font-weight: 600; margin: 14px 0 6px 0; border-left: 3px solid #38bdf8; padding-left: 8px; }
         
@@ -72,11 +73,11 @@
         <h2>Smart Kandang</h2>
         <div class="subtitle">Elba & KUB Janaka (Target 1 Kg)</div>
         
-        <!-- Widget Pengingat Waktu Sholat dengan GPS -->
+        <!-- Widget Pengingat Waktu Sholat dengan Alarm Suara -->
         <div class="sholat-box">
             <div class="sholat-header">
-                <div class="sholat-title">🕌 Jadwal Sholat Otomatis</div>
-                <button class="btn-gps" onclick="deteksiLokasiGPS()">📍 Deteksi GPS</button>
+                <div class="sholat-title">🕌 Jadwal Sholat & Alarm</div>
+                <button class="btn-gps" onclick="deteksiLokasiGPS()">📍 Cek GPS</button>
             </div>
             <div class="lokasi-info" id="lokasiInfo">Memuat lokasi Anda...</div>
             <div class="sholat-times" id="sholatTimesContainer">
@@ -86,6 +87,7 @@
                 <div class="sholat-item">Maghrib<div class="sholat-time" id="sMaghrib">--:--</div></div>
                 <div class="sholat-item">Isya<div class="sholat-time" id="sIsya">--:--</div></div>
             </div>
+            <div class="alarm-status" id="alarmStatus">🔊 Alarm suara aktif (biarkan tab tetap terbuka)</div>
         </div>
 
         <div class="section-title">🐔 Data Asas & Populasi</div>
@@ -161,10 +163,12 @@
     </div>
 
     <script>
+        let jadwalHariIni = {};
+        let sudahAlarm = { subuh: false, dzuhur: false, ashar: false, maghrib: false, isya: false };
+
         window.onload = function() {
             tampilkanRiwayat();
             
-            // Cek apakah ada koordinat tersimpan sebelumnya
             const savedLat = localStorage.getItem('userLat');
             const savedLon = localStorage.getItem('userLon');
             const savedCityName = localStorage.getItem('userCityName');
@@ -173,7 +177,6 @@
                 document.getElementById('lokasiInfo').innerText = `📍 Lokasi: ${savedCityName || 'GPS Otomatis'}`;
                 fetchJadwalByCoords(savedLat, savedLon);
             } else {
-                // Default ke Serang/Banten jika belum ada GPS
                 deteksiLokasiGPS();
             }
 
@@ -187,12 +190,15 @@
             if(localStorage.getItem('savedPopulasi')) {
                 document.getElementById('inputPopulasi').value = localStorage.getItem('savedPopulasi');
             }
+
+            // Jalankan pengecekan jam setiap 10 detik untuk alarm
+            setInterval(cekWaktuAlarm, 10000);
         };
 
         function deteksiLokasiGPS() {
             const info = document.getElementById('lokasiInfo');
             if (!navigator.geolocation) {
-                info.innerText = "GPS tidak didukung browser ini. Menggunakan wilayah Serang.";
+                info.innerText = "GPS tidak didukung. Menggunakan Serang.";
                 fetchJadwalByCityName("serang");
                 return;
             }
@@ -205,7 +211,6 @@
                     localStorage.setItem('userLat', lat);
                     localStorage.setItem('userLon', lon);
                     
-                    // Cari nama kota via reverse geocoding gratis
                     try {
                         const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
                         const data = await res.json();
@@ -219,7 +224,7 @@
                     fetchJadwalByCoords(lat, lon);
                 },
                 (error) => {
-                    info.innerText = "GPS ditolak/gagal. Otomatis menggunakan Kab. Serang.";
+                    info.innerText = "GPS ditolak. Menggunakan Kab. Serang.";
                     fetchJadwalByCityName("serang");
                 },
                 { timeout: 10000 }
@@ -233,24 +238,20 @@
             const day = String(now.getDate()).padStart(2, '0');
 
             try {
-                // Cari ID kota terdekat dari MyQuran API berdasarkan nama atau koordinat pencarian
-                // Kita gunakan pencarian kota otomatis berdasarkan string umum Banten/Serang jika koordinat di sekitar Banten
-                let cityId = "1218"; // default Tangerang
+                let cityId = "1218"; 
                 if(lat >= -6.3 && lat <= -5.9 && lon >= 105.8 && lon <= 106.6) {
-                    // Wilayah Banten (Serang/Cilegon/Tangerang), kita cari id kota serang (1221 atau sekitarnya)
-                    cityId = "1222"; // ID untuk Kab. Serang / Kota Serang di MyQuran
+                    cityId = "1222"; 
                 }
 
-                // Ambil data berdasarkan ID kota MyQuran yang cocok
                 const response = await fetch(`https://api.myquran.com/v2/sholat/jadwal/${cityId}/${year}/${month}/${day}`);
                 const data = await response.json();
                 if(data && data.status && data.data && data.data.jadwal) {
-                    const j = data.data.jadwal;
-                    document.getElementById('sSubuh').innerText = j.subuh;
-                    document.getElementById('sDzuhur').innerText = j.dzuhur;
-                    document.getElementById('sAshar').innerText = j.ashar;
-                    document.getElementById('sMaghrib').innerText = j.maghrib;
-                    document.getElementById('sIsya').innerText = j.isya;
+                    jadwalHariIni = data.data.jadwal;
+                    document.getElementById('sSubuh').innerText = jadwalHariIni.subuh;
+                    document.getElementById('sDzuhur').innerText = jadwalHariIni.dzuhur;
+                    document.getElementById('sAshar').innerText = jadwalHariIni.ashar;
+                    document.getElementById('sMaghrib').innerText = jadwalHariIni.maghrib;
+                    document.getElementById('sIsya').innerText = jadwalHariIni.isya;
                 }
             } catch (error) {
                 console.log('Gagal memuat jadwal sholat:', error);
@@ -273,16 +274,61 @@
                     const response = await fetch(`https://api.myquran.com/v2/sholat/jadwal/${cityId}/${year}/${month}/${day}`);
                     const data = await response.json();
                     if(data && data.status && data.data && data.data.jadwal) {
-                        const j = data.data.jadwal;
-                        document.getElementById('sSubuh').innerText = j.subuh;
-                        document.getElementById('sDzuhur').innerText = j.dzuhur;
-                        document.getElementById('sAshar').innerText = j.ashar;
-                        document.getElementById('sMaghrib').innerText = j.maghrib;
-                        document.getElementById('sIsya').innerText = j.isya;
+                        jadwalHariIni = data.data.jadwal;
+                        document.getElementById('sSubuh').innerText = jadwalHariIni.subuh;
+                        document.getElementById('sDzuhur').innerText = jadwalHariIni.dzuhur;
+                        document.getElementById('sAshar').innerText = jadwalHariIni.ashar;
+                        document.getElementById('sMaghrib').innerText = jadwalHariIni.maghrib;
+                        document.getElementById('sIsya').innerText = jadwalHariIni.isya;
                     }
                 }
             } catch (e) {
                 console.log('Gagal cari kota:', e);
+            }
+        }
+
+        function cekWaktuAlarm() {
+            if (!jadwalHariIni.subuh) return;
+
+            const now = new Date();
+            const jamSekarang = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+
+            // Cek masing-masing waktu sholat
+            if (jamSekarang === jadwalHariIni.subuh && !sudahAlarm.subuh) {
+                bunyikanAlarm("Subuh");
+                sudahAlarm.subuh = true;
+            }
+            if (jamSekarang === jadwalHariIni.dzuhur && !sudahAlarm.dzuhur) {
+                bunyikanAlarm("Dzuhur");
+                sudahAlarm.dzuhur = true;
+            }
+            if (jamSekarang === jadwalHariIni.ashar && !sudahAlarm.ashar) {
+                bunyikanAlarm("Ashar");
+                sudahAlarm.ashar = true;
+            }
+            if (jamSekarang === jadwalHariIni.maghrib && !sudahAlarm.maghrib) {
+                bunyikanAlarm("Maghrib");
+                sudahAlarm.maghrib = true;
+            }
+            if (jamSekarang === jadwalHariIni.isya && !sudahAlarm.isya) {
+                bunyikanAlarm("Isya");
+                sudahAlarm.isya = true;
+            }
+        }
+
+        function bunyikanAlarm(waktuSholat) {
+            const teksPesan = `Preen, udah adzan ${waktuSholat}, tinggalin dulu rutinitasnya, ayo sholat`;
+            
+            // Tampilkan notifikasi visual di web
+            alert(`🕌 WAKTU ${waktuSholat.toUpperCase()}!\n\n"Preen, udah adzan, tinggalin dulu rutinitasnya, ayo sholat"`);
+
+            // Jalankan suara bicara otomatis dari HP
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(teksPesan);
+                utterance.lang = 'id-ID';
+                utterance.rate = 0.9; // Kecepatan bicara santai
+                utterance.pitch = 1.0;
+                window.speechSynthesis.speak(utterance);
             }
         }
 
@@ -372,11 +418,11 @@
 
             const dataBaru = { waktuCatat, umur, populasi, pakan, suhu, kelembapan, hujan, sekam, status };
 
-            let riwayat = JSON.parse(localStorage.getItem('riwayatSmartKandangFinalV7')) || [];
+            let riwayat = JSON.parse(localStorage.getItem('riwayatSmartKandangFinalV8')) || [];
             riwayat.unshift(dataBaru);
             if (riwayat.length > 100) riwayat.pop();
 
-            localStorage.setItem('riwayatSmartKandangFinalV7', JSON.stringify(riwayat));
+            localStorage.setItem('riwayatSmartKandangFinalV8', JSON.stringify(riwayat));
             tampilkanRiwayat();
         }
 
@@ -384,7 +430,7 @@
             const historyList = document.getElementById('historyList');
             const btnClear = document.getElementById('btnClear');
             const btnExcel = document.getElementById('btnExcel');
-            let riwayat = JSON.parse(localStorage.getItem('riwayatSmartKandangFinalV7')) || [];
+            let riwayat = JSON.parse(localStorage.getItem('riwayatSmartKandangFinalV8')) || [];
 
             if (riwayat.length === 0) {
                 historyList.innerHTML = '<p style="color: #64748b; font-style: italic;">Belum ada catatan tersimpan.</p>';
@@ -411,7 +457,7 @@
         }
 
         function downloadExcel() {
-            let riwayat = JSON.parse(localStorage.getItem('riwayatSmartKandangFinalV7')) || [];
+            let riwayat = JSON.parse(localStorage.getItem('riwayatSmartKandangFinalV8')) || [];
             if (riwayat.length === 0) {
                 alert('Belum ada data untuk diunduh.');
                 return;
@@ -435,7 +481,7 @@
 
         function hapusRiwayat() {
             if (confirm('Yakin ingin menghapus seluruh riwayat catatan kandang?')) {
-                localStorage.removeItem('riwayatSmartKandangFinalV7');
+                localStorage.removeItem('riwayatSmartKandangFinalV8');
                 tampilkanRiwayat();
             }
         }
