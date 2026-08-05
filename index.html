@@ -116,10 +116,11 @@
     </div>
 
     <script>
-        let dataTernak = JSON.parse(localStorage.getItem('kub_catatan_v3')) || [];
-        let dataKeu = JSON.parse(localStorage.getItem('kub_keu_v3')) || [{ nama: 'Modal Awal (DOC)', tipe: 'keluar', nominal: 1000000 }];
+        // Menggunakan kunci penyimpanan baru agar data langsung terbaca normal
+        let dataTernak = JSON.parse(localStorage.getItem('kub_catatan_v4')) || [];
+        let dataKeu = JSON.parse(localStorage.getItem('kub_keu_v4')) || [{ nama: 'Modal Awal (DOC)', tipe: 'keluar', nominal: 1000000 }];
         let populasiAwal = 79;
-        const hargaPakanPerKg = 515000 / 50; // Rp 10.300 per kg
+        const hargaPakanPerKg = 515000 / 50;
 
         document.getElementById('input-tanggal').valueAsDate = new Date();
         renderData();
@@ -131,7 +132,7 @@
             let ket = document.getElementById('input-ket').value;
 
             dataTernak.unshift({ tanggal, mati, pakan, ket });
-            localStorage.setItem('kub_catatan_v3', JSON.stringify(dataTernak));
+            localStorage.setItem('kub_catatan_v4', JSON.stringify(dataTernak));
             
             document.getElementById('input-mati').value = 0;
             document.getElementById('input-pakan').value = 0;
@@ -150,7 +151,7 @@
             }
 
             dataKeu.unshift({ nama, tipe, nominal });
-            localStorage.setItem('kub_keu_v3', JSON.stringify(dataKeu));
+            localStorage.setItem('kub_keu_v4', JSON.stringify(dataKeu));
 
             document.getElementById('keu-nama').value = '';
             document.getElementById('keu-nominal').value = '';
@@ -165,12 +166,11 @@
             let totalKeluar = dataKeu.filter(i => i.tipe === 'keluar').reduce((sum, i) => sum + i.nominal, 0);
             let estimasiBiayaPakanTotal = totalPakan * hargaPakanPerKg;
 
-            // Hitung FCR Aktual otomatis: Total Pakan (kg) dibagi Estimasi Bobot Total Sisa Populasi (asumsi target 1kg/ekor)
             let estimasiTotalBobotKg = sisaPopulasi * 1.0; 
             let fcrAktual = estimasiTotalBobotKg > 0 ? (totalPakan / estimasiTotalBobotKg).toFixed(2) : '0.00';
 
             document.getElementById('stat-populasi').innerText = sisaPopulasi;
-            document.getElementById('stat-mati').innerText = totalMati; // Jika elemen mati ada
+            document.getElementById('stat-mati').innerText = totalMati;
             document.getElementById('stat-pakan').innerText = totalPakan.toFixed(1) + ' kg';
             document.getElementById('stat-biaya-pakan').innerText = 'Rp ' + Math.round(estimasiBiayaPakanTotal).toLocaleString('id-ID');
             document.getElementById('stat-fcr').innerText = fcrAktual;
