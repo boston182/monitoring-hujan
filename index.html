@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KUB Janaka Research & Farm Manager</title>
+    <title>Manajemen Ternak KUB Janaka - Pak Toni</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans">
-    <div class="max-w-5xl mx-auto p-4 sm:p-6">
+    <div class="max-w-4xl mx-auto p-4 sm:p-6">
         <!-- Header -->
         <header class="bg-emerald-600 text-white p-6 rounded-2xl shadow-lg mb-6">
-            <h1 class="text-2xl font-bold">🐔 KUB Janaka Research & Farm Manager</h1>
-            <p class="text-emerald-100 text-sm mt-1">Sistem Kontrol Usaha, Data FCR, dan Standar Operasional (SOP) Pak Toni</p>
+            <h1 class="text-2xl font-bold">🐔 KUB Janaka Farm Manager</h1>
+            <p class="text-emerald-100 text-sm mt-1">Kontrol Populasi, Pakan, FCR, & Keuangan Usaha Pak Toni</p>
         </header>
 
-        <!-- Statistik Utama & FCR -->
+        <!-- Ringkasan Statistik Utama -->
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
             <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
                 <p class="text-xs text-slate-500 font-medium">Populasi Aktif</p>
@@ -22,8 +22,8 @@
                 <span class="text-[10px] text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">Ekor Hidup</span>
             </div>
             <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
-                <p class="text-xs text-slate-500 font-medium">Total Pakan & Biaya</p>
-                <p id="stat-pakan" class="text-lg font-bold text-amber-600 mt-1">0 kg</p>
+                <p class="text-xs text-slate-500 font-medium">Total Pakan</p>
+                <p id="stat-pakan" class="text-2xl font-bold text-amber-600 mt-1">0 kg</p>
                 <span id="stat-biaya-pakan" class="text-[10px] text-amber-600 bg-amber-50 px-2 py-0.5 rounded">Rp 0</span>
             </div>
             <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
@@ -32,125 +32,83 @@
                 <span class="text-[10px] text-purple-600 bg-purple-50 px-2 py-0.5 rounded">Target: 2.2</span>
             </div>
             <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
-                <p class="text-xs text-slate-500 font-medium">Estimasi HPP / Kg</p>
-                <p id="stat-hpp" class="text-lg font-bold text-blue-600 mt-1">Rp 0</p>
-                <span class="text-[10px] text-blue-600 bg-blue-50 px-2 py-0.5 rounded">Modal / Bobot Total</span>
+                <p class="text-xs text-slate-500 font-medium">Estimasi Kas Keluar</p>
+                <p id="stat-biaya" class="text-lg font-bold text-blue-600 mt-1">Rp 1.0jt</p>
+                <span class="text-[10px] text-blue-600 bg-blue-50 px-2 py-0.5 rounded">Modal+Operasional</span>
             </div>
         </div>
 
-        <!-- Menu Input Data & Riset -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-            <!-- 1. Catat Harian -->
+        <!-- Panel Input Transaksi / Catatan Harian -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <!-- Form Catatan Harian -->
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-                <h2 class="font-bold text-base text-slate-800 mb-3">📝 Harian (Mati/Pakan)</h2>
-                <div class="space-y-3 text-sm">
+                <h2 class="font-bold text-lg text-slate-800 mb-4">📝 Catat Aktivitas Harian</h2>
+                <div class="space-y-3">
                     <div>
                         <label class="block text-xs font-medium text-slate-600 mb-1">Tanggal</label>
-                        <input type="date" id="input-tanggal" class="w-full border border-slate-200 rounded-lg p-2 outline-none focus:ring-2 focus:ring-emerald-500">
+                        <input type="date" id="input-tanggal" class="w-full border border-slate-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
                     </div>
                     <div class="grid grid-cols-2 gap-2">
                         <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1">Mati (Ekor)</label>
-                            <input type="number" id="input-mati" value="0" class="w-full border border-slate-200 rounded-lg p-2 outline-none">
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Ayam Mati (Ekor)</label>
+                            <input type="number" id="input-mati" value="0" class="w-full border border-slate-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1">Pakan (Kg)</label>
-                            <input type="number" id="input-pakan" value="0" class="w-full border border-slate-200 rounded-lg p-2 outline-none">
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Pakan Masuk (Kg)</label>
+                            <input type="number" id="input-pakan" value="0" class="w-full border border-slate-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
                         </div>
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-slate-600 mb-1">Catatan Kondisi</label>
-                        <input type="text" id="input-ket" placeholder="Misal: Sehat / Vaksin" class="w-full border border-slate-200 rounded-lg p-2 outline-none">
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Keterangan / Catatan Suhu</label>
+                        <input type="text" id="input-ket" placeholder="Contoh: Sehat / Vaksin ND" class="w-full border border-slate-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
                     </div>
-                    <button onclick="tambahCatatan()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 rounded-lg transition">Simpan Catatan</button>
+                    <button onclick="tambahCatatan()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-lg text-sm transition shadow-md">Simpan Catatan</button>
                 </div>
             </div>
 
-            <!-- 2. Riset Sampling Berat -->
+            <!-- Form Keuangan / Modal -->
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-                <h2 class="font-bold text-base text-slate-800 mb-3">⚖️ Riset Sampling Berat</h2>
-                <div class="space-y-3 text-sm">
+                <h2 class="font-bold text-lg text-slate-800 mb-4">💰 Catat Keuangan / Biaya</h2>
+                <div class="space-y-3">
                     <div>
-                        <label class="block text-xs font-medium text-slate-600 mb-1">Umur Ayam (Hari / Minggu)</label>
-                        <input type="text" id="sample-umur" placeholder="Misal: Minggu ke-4" class="w-full border border-slate-200 rounded-lg p-2 outline-none">
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Jenis Pengeluaran / Pemasukan</label>
+                        <input type="text" id="keu-nama" placeholder="Contoh: Beli Pakan / Jual Panen" class="w-full border border-slate-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
                     </div>
                     <div class="grid grid-cols-2 gap-2">
                         <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1">Jml Sampel (Ekor)</label>
-                            <input type="number" id="sample-jml" placeholder="10" class="w-full border border-slate-200 rounded-lg p-2 outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1">Total Berat (Gram/Kg)</label>
-                            <input type="number" id="sample-berat" placeholder="Contoh: 3500 (gram)" class="w-full border border-slate-200 rounded-lg p-2 outline-none">
-                        </div>
-                    </div>
-                    <button onclick="tambahSampel()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 rounded-lg transition mt-6">Simpan Sampling</button>
-                </div>
-            </div>
-
-            <!-- 3. Keuangan -->
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-                <h2 class="font-bold text-base text-slate-800 mb-3">💰 Keuangan (Modal/Biaya)</h2>
-                <div class="space-y-3 text-sm">
-                    <div>
-                        <label class="block text-xs font-medium text-slate-600 mb-1">Nama Transaksi</label>
-                        <input type="text" id="keu-nama" placeholder="Contoh: Beli Vitamin / Listrik" class="w-full border border-slate-200 rounded-lg p-2 outline-none">
-                    </div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1">Tipe</label>
-                            <select id="keu-tipe" class="w-full border border-slate-200 rounded-lg p-2 bg-white outline-none">
-                                <option value="keluar">Keluar</option>
-                                <option value="masuk">Masuk</option>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Kategori</label>
+                            <select id="keu-tipe" class="w-full border border-slate-200 rounded-lg p-2 text-sm bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
+                                <option value="keluar">Pengeluaran</option>
+                                <option value="masuk">Pemasukan</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1">Nominal (Rp)</label>
-                            <input type="number" id="keu-nominal" placeholder="50000" class="w-full border border-slate-200 rounded-lg p-2 outline-none">
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Jumlah (Rp)</label>
+                            <input type="number" id="keu-nominal" placeholder="515000" class="w-full border border-slate-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
                         </div>
                     </div>
-                    <button onclick="tambahKeuangan()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition mt-6">Tambah Kas</button>
+                    <button onclick="tambahKeuangan()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg text-sm transition shadow-md mt-6">Tambah Transaksi Keuangan</button>
                 </div>
             </div>
         </div>
 
-        <!-- Panduan & SOP Darurat (Ayam Kerdil & Sakit) -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div class="bg-amber-50 border border-amber-200 p-5 rounded-2xl">
-                <h3 class="font-bold text-amber-800 mb-2">⚠️ SOP: Penanganan Bobot Kurang / Ayam Kerdil</h3>
-                <ul class="text-xs text-amber-900 space-y-1.5 list-disc pl-4">
-                    <li><strong>Culling / Grading:</strong> Pisahkan ayam yang ukuran tubuhnya jauh tertinggal dari kelompoknya agar tidak kalah berebut pakan.</li>
-                    <li><strong>Kepadatan Kandang:</strong> Pastikan sirkulasi udara di kandang susun lancar dan ruang gerak cukup (tidak terlalu sesak).</li>
-                    <li><strong>Nutrisi Tambahan:</strong> Berikan vitamin B-Complex atau suplemen penambah nafsu makan/pencernaan pada air minum.</li>
-                    <li><strong>Kualitas Pakan:</strong> Pastikan pakan BR11 selalu segar, wadah pakan bersih, dan air minum tidak pernah kosong (24 jam).</li>
-                </ul>
-            </div>
-            <div class="bg-rose-50 border border-rose-200 p-5 rounded-2xl">
-                <h3 class="font-bold text-rose-800 mb-2">💊 SOP: Treatment Ayam Sakit / Indikasi Menular</h3>
-                <ul class="text-xs text-rose-900 space-y-1.5 list-disc pl-4">
-                    <li><strong>Karantina Cepat:</strong> Segera pindahkan ayam yang menunjukkan gejala lesu, ngorok, atau berak kapur ke lantai/kandang isolasi terpisah.</li>
-                    <li><strong>Sanitasi Ketat:</strong> Semprot disinfektan di sekitar kandang susun secara berkala untuk memutus rantai penularan.</li>
-                    <li><strong>Elektrolit & Vitamin:</strong> Berikan air minum yang dicampur vitamin dan elektrolit untuk memulihkan stamina ayam sakit.</li>
-                    <li><strong>Catat Riwayat:</strong> Masukkan kejadian sakit di kolom catatan harian aplikasi untuk evaluasi kebersihan kandang.</li>
-                </ul>
-            </div>
-        </div>
-
-        <!-- Tabel Riwayat Data -->
+        <!-- Tabel Riwayat & Data -->
         <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 mb-6">
-            <h2 class="font-bold text-lg text-slate-800 mb-3">📋 Riwayat Catatan Harian & Riset</h2>
+            <h2 class="font-bold text-lg text-slate-800 mb-3">📋 Riwayat Catatan Harian Ternak</h2>
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm">
                     <thead>
                         <tr class="border-b border-slate-100 text-slate-500">
-                            <th class="py-2 px-3">Tanggal / Info</th>
+                            <th class="py-2 px-3">Tanggal</th>
                             <th class="py-2 px-3">Mati</th>
                             <th class="py-2 px-3">Pakan (Kg)</th>
-                            <th class="py-2 px-3">Catatan / Sampling Berat</th>
+                            <th class="py-2 px-3">Catatan</th>
                         </tr>
                     </thead>
                     <tbody id="tabel-catatan">
-                        <tr><td colspan="4" class="text-center py-4 text-slate-400">Belum ada data tercatat.</td></tr>
+                        <tr>
+                            <td colspan="4" class="text-center py-4 text-slate-400">Belum ada catatan harian tersimpan.</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -158,12 +116,10 @@
     </div>
 
     <script>
-        let dataTernak = JSON.parse(localStorage.getItem('kub_catatan_v2')) || [];
-        let dataKeu = JSON.parse(localStorage.getItem('kub_keu_v2')) || [
-            { nama: 'Modal Awal (DOC 100 ekor)', tipe: 'keluar', nominal: 1000000 }
-        ];
+        let dataTernak = JSON.parse(localStorage.getItem('kub_catatan_v3')) || [];
+        let dataKeu = JSON.parse(localStorage.getItem('kub_keu_v3')) || [{ nama: 'Modal Awal (DOC)', tipe: 'keluar', nominal: 1000000 }];
         let populasiAwal = 79;
-        const hargaPakanPerKg = 515000 / 50; // Rp 10.300 / kg
+        const hargaPakanPerKg = 515000 / 50; // Rp 10.300 per kg
 
         document.getElementById('input-tanggal').valueAsDate = new Date();
         renderData();
@@ -172,36 +128,14 @@
             let tanggal = document.getElementById('input-tanggal').value;
             let mati = parseInt(document.getElementById('input-mati').value) || 0;
             let pakan = parseFloat(document.getElementById('input-pakan').value) || 0;
-            let ket = document.getElementById('input-ket').value || 'Aktivitas Harian';
+            let ket = document.getElementById('input-ket').value;
 
-            dataTernak.unshift({ jenis: 'harian', tanggal, mati, pakan, ket });
-            localStorage.setItem('kub_catatan_v2', JSON.stringify(dataTernak));
+            dataTernak.unshift({ tanggal, mati, pakan, ket });
+            localStorage.setItem('kub_catatan_v3', JSON.stringify(dataTernak));
             
             document.getElementById('input-mati').value = 0;
             document.getElementById('input-pakan').value = 0;
             document.getElementById('input-ket').value = '';
-            renderData();
-        }
-
-        function tambahSampel() {
-            let umur = document.getElementById('sample-umur').value;
-            let jml = parseInt(document.getElementById('sample-jml').value) || 0;
-            let berat = parseFloat(document.getElementById('sample-berat').value) || 0; // dalam gram
-
-            if(!umur || jml <= 0 || berat <= 0) {
-                alert('Mohon isi data sampling dengan lengkap.');
-                return;
-            }
-
-            let rataRata = berat / jml; // gram per ekor
-            let ket = `Sampling [${umur}]: ${jml} ekor, Total ${berat}g (Rata-rata ${rataRata.toFixed(0)}g/ekor)`;
-            
-            dataTernak.unshift({ jenis: 'sampel', tanggal: new Date().toISOString().split('T')[0], mati: 0, pakan: 0, ket });
-            localStorage.setItem('kub_catatan_v2', JSON.stringify(dataTernak));
-
-            document.getElementById('sample-umur').value = '';
-            document.getElementById('sample-jml').value = '';
-            document.getElementById('sample-berat').value = '';
             renderData();
         }
 
@@ -211,12 +145,12 @@
             let nominal = parseFloat(document.getElementById('keu-nominal').value) || 0;
 
             if(!nama || nominal <= 0) {
-                alert('Mohon isi transaksi dengan benar.');
+                alert('Mohon isi nama transaksi dan nominal dengan benar.');
                 return;
             }
 
             dataKeu.unshift({ nama, tipe, nominal });
-            localStorage.setItem('kub_keu_v2', JSON.stringify(dataKeu));
+            localStorage.setItem('kub_keu_v3', JSON.stringify(dataKeu));
 
             document.getElementById('keu-nama').value = '';
             document.getElementById('keu-nominal').value = '';
@@ -230,34 +164,28 @@
 
             let totalKeluar = dataKeu.filter(i => i.tipe === 'keluar').reduce((sum, i) => sum + i.nominal, 0);
             let estimasiBiayaPakanTotal = totalPakan * hargaPakanPerKg;
-            let totalModalRiil = totalKeluar + estimasiBiayaPakanTotal;
 
-            // FCR Aktual: (Total Pakan Kg) / (Estimasi Total Bobot Hidup Sisa Populasi, asumsi target 1kg atau pakai data sampel jika ada)
-            // Menggunakan estimasi sisa populasi dikali rata-rata 1kg atau berat riil
-            let estimasiTotalBobotKg = sisaPopulasi * 1.0; // Asumsi mendekati 1kg saat akhir, atau FCR berjalan
+            // Hitung FCR Aktual otomatis: Total Pakan (kg) dibagi Estimasi Bobot Total Sisa Populasi (asumsi target 1kg/ekor)
+            let estimasiTotalBobotKg = sisaPopulasi * 1.0; 
             let fcrAktual = estimasiTotalBobotKg > 0 ? (totalPakan / estimasiTotalBobotKg).toFixed(2) : '0.00';
 
-            let hppPerKg = estimasiTotalBobotKg > 0 ? Math.round(totalModalRiil / estimasiTotalBobotKg) : 0;
-
-            // Update UI Statistik
             document.getElementById('stat-populasi').innerText = sisaPopulasi;
+            document.getElementById('stat-mati').innerText = totalMati; // Jika elemen mati ada
             document.getElementById('stat-pakan').innerText = totalPakan.toFixed(1) + ' kg';
             document.getElementById('stat-biaya-pakan').innerText = 'Rp ' + Math.round(estimasiBiayaPakanTotal).toLocaleString('id-ID');
             document.getElementById('stat-fcr').innerText = fcrAktual;
-            document.getElementById('stat-hpp').innerText = 'Rp ' + hppPerKg.toLocaleString('id-ID');
+            document.getElementById('stat-biaya').innerText = 'Rp ' + (totalKeluar / 1000000).toFixed(1) + 'jt';
 
-            // Render Tabel
             let html = '';
             if(dataTernak.length === 0) {
-                html = `<tr><td colspan="4" class="text-center py-4 text-slate-400">Belum ada data tercatat.</td></tr>`;
+                html = `<tr><td colspan="4" class="text-center py-4 text-slate-400">Belum ada catatan harian tersimpan.</td></tr>`;
             } else {
                 dataTernak.forEach(item => {
-                    let badge = item.jenis === 'sampel' ? '<span class="bg-purple-100 text-purple-700 text-[10px] px-2 py-0.5 rounded font-bold">Riset Berat</span>' : item.tanggal;
                     html += `<tr class="border-b border-slate-50">
-                        <td class="py-2.5 px-3">${badge}</td>
-                        <td class="py-2.5 px-3 text-rose-600 font-medium">${item.mati > 0 ? item.mati + ' ekor' : '-'}</td>
-                        <td class="py-2.5 px-3 text-amber-600 font-medium">${item.pakan > 0 ? item.pakan + ' kg' : '-'}</td>
-                        <td class="py-2.5 px-3 text-slate-600">${item.ket}</td>
+                        <td class="py-2.5 px-3">${item.tanggal}</td>
+                        <td class="py-2.5 px-3 text-rose-600 font-medium">${item.mati} ekor</td>
+                        <td class="py-2.5 px-3 text-amber-600 font-medium">${item.pakan} kg</td>
+                        <td class="py-2.5 px-3 text-slate-600">${item.ket || '-'}</td>
                     </tr>`;
                 });
             }
