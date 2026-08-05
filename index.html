@@ -62,7 +62,6 @@
                         <label class="block text-xs font-medium text-slate-600 mb-1">Keterangan / Catatan Suhu</label>
                         <input type="text" id="input-ket" placeholder="Contoh: Sehat / Vaksin ND" class="w-full border border-slate-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
                     </div>
-                    <!-- Tombol ini sekarang dipastikan memanggil fungsi tambahCatatan() -->
                     <button type="button" onclick="tambahCatatan()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-lg text-sm transition shadow-md">Simpan Catatan</button>
                 </div>
             </div>
@@ -117,8 +116,8 @@
     </div>
 
     <script>
-        let dataTernak = JSON.parse(localStorage.getItem('kub_catatan_v5')) || [];
-        let dataKeu = JSON.parse(localStorage.getItem('kub_keu_v5')) || [{ nama: 'Modal Awal (DOC)', tipe: 'keluar', nominal: 1000000 }];
+        let dataTernak = JSON.parse(localStorage.getItem('kub_catatan_v6')) || [];
+        let dataKeu = JSON.parse(localStorage.getItem('kub_keu_v6')) || [{ nama: 'Modal Awal (DOC)', tipe: 'keluar', nominal: 1000000 }];
         let populasiAwal = 79;
         const hargaPakanPerKg = 515000 / 50;
 
@@ -132,7 +131,7 @@
             let ket = document.getElementById('input-ket').value;
 
             dataTernak.unshift({ tanggal, mati, pakan, ket });
-            localStorage.setItem('kub_catatan_v5', JSON.stringify(dataTernak));
+            localStorage.setItem('kub_catatan_v6', JSON.stringify(dataTernak));
             
             document.getElementById('input-mati').value = 0;
             document.getElementById('input-pakan').value = 0;
@@ -151,7 +150,7 @@
             }
 
             dataKeu.unshift({ nama, tipe, nominal });
-            localStorage.setItem('kub_keu_v5', JSON.stringify(dataKeu));
+            localStorage.setItem('kub_keu_v6', JSON.stringify(dataKeu));
 
             document.getElementById('keu-nama').value = '';
             document.getElementById('keu-nominal').value = '';
@@ -170,7 +169,6 @@
             let fcrAktual = estimasiTotalBobotKg > 0 ? (totalPakan / estimasiTotalBobotKg).toFixed(2) : '0.00';
 
             document.getElementById('stat-populasi').innerText = sisaPopulasi;
-            document.getElementById('stat-mati').innerText = totalMati;
             document.getElementById('stat-pakan').innerText = totalPakan.toFixed(1) + ' kg';
             document.getElementById('stat-biaya-pakan').innerText = 'Rp ' + Math.round(estimasiBiayaPakanTotal).toLocaleString('id-ID');
             document.getElementById('stat-fcr').innerText = fcrAktual;
